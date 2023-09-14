@@ -1,0 +1,83 @@
+---
+title: "Econometrics Assignment"
+author: "Ssewanyana Herbert"
+date: "2023-08-12"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+install.packages("tidyverse")
+library("tidyverse")
+beauty=read.csv("beauty.csv")
+
+```
+```{r}
+View(beauty)
+```
+$$ Question 1$$
+```{r}
+beauty.new=beauty %>% mutate(gender=ifelse(female==1,"female","male"))
+```
+```{r}
+fraction= beauty.new %>% group_by(gender)%>% filter(abvavg==1) %>% summarise(Frequency=table(gender)) 
+fraction
+```
+```{r}
+fraction1= beauty.new %>% group_by(gender)%>% filter(belavg==1) %>% summarise(Frequency=table(gender)) 
+fraction1
+```
+$$ Question 1: Ans\:
+More\ people\ are\ rated\ having\ above\ average\ looks$$
+
+```{r}
+# Qeustion 2
+```
+```{r}
+install.packages("lmtest")
+library(lmtest)
+```
+$$ lwage= b0+b1belavg+b2abvavg+b3female+b4educ+b5exper+b5exper^2+u$$
+```{r}
+model = lm(lwage ~ belavg + abvavg + female + educ + exper + expersq, data = beauty)
+summary(model)
+```
+$$Basing\ on\ the\ results,\ the\ model\ is\ statistically\ significant\ since\ the\ F-value\ is\ large\ and\ the\ p-value\ is\ lessthan\ 0.05.\ An\ increase\ in\ below\ average\ and\ above\ average\ looks,\ female\ and\ squared\ experience\ by\ 1\ unit\ leads\ to\ a\ reduction\ in\ the\ wage\ while\ ancrease\ in\ education\ and\ experience\ leas\ to\ an\ increase\ in\ the\ wage.$$
+$$Question\ 3$$
+```{r}
+install.packages("sandwich")
+library(sandwich)
+```
+```{r}
+model1= coeftest(model, vcov = vcovHC(model, type = "HC1"))
+print(model1)
+```
+$$From\ the\ above\ results,\ it's\ evident\ that\ the\ coefficient\ values,\ standard\ errors,\ t\ and\ p-values\ are\ different.$$
+$$The\ OLS\ standard\ errors\ were\ over-stating\ the\ standard\ errors\ for\ the\ coefficients\ of\ the\ constant,\ below\ average\ looks,\ female,\ education,\ experience\ and\ squared\ expereince\ while\ it\ under-stated\ the standard\ error\ for\ the\ coefficient\ of\ above\ average\ looks.$$
+$$The\ coefficient\ of\ female\ slightly\ increased\ but\ it\ remained\ statistically\ significant.$$
+$$Question\ 4$$
+```{r}
+model2 = lm(lwage ~ female:belavg + female:abvavg + female + female:educ + female:exper + female:expersq, data = beauty)
+summary(model2)
+```
+$$ The\ coefficients\ of\ the\ interaction\ between\ female\ with\ education,\ and\ experience\ are\ positive\ and\ significant.$$ 
+$$The\ coefficient\ of\ the\ interaction\ between\ female\ and\ below\ looks\ is\ negative\ and\ insignificant\ while\ the\ results\ of interaction\ between\ female\ and\ above\ average\ looks\ is\ positive\ but\ insignificant.$$
+$$The\ F-Statistic\ of\ the\ model\ is\ high\ and\ the\ p-value\ confirms\ that\ the\ model\ is\ statistically\ significant.$$
+$$Question\ 5$$
+```{r}
+#F-test
+anova(model2)
+```
+```{r}
+#Heteroskedasticity-robust version
+HRV1= coeftest(model2, vcov = vcovHC(model2, type = "HC1"))
+print(HRV1)
+```
+$$Generally\ the\ using\ the\ heteroskedasticity-robust\ version\ slightly\ change\ the\ outcome\ since\ the\ p-values\ become\ more\ significant$$ 
+$$Question\ 6$$
+$$ The\ female*belavg\ and female*abvavg\ aren't\ jointly\ significant\ since\ their\ p-values\ are\ higher\ than\ the\ critical\ value\ (0.05)$$
+
